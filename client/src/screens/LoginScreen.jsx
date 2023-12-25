@@ -18,8 +18,6 @@ import {
 } from "@chakra-ui/react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import { FcGoogle } from "react-icons/fc";
-import { FaFacebook } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import InputField from "../components/InputField.jsx";
 import InputPasswordField from "../components/InputPasswordField.jsx";
@@ -27,7 +25,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { authUser, userSelector } from "../redux/slices/userSlice.js";
 import AlertRow from "../components/AlertRow.jsx";
 import { useEffect } from "react";
-import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
+import FacebookLoginButton from "../components/FacebookLoginButton.jsx";
+import GoogleLoginButton from "../components/GoogleLoginButton.jsx";
 
 const LoginScreen = () => {
   const location = useLocation();
@@ -110,23 +109,8 @@ const LoginScreen = () => {
               <Divider />
               <AbsoluteCenter bg="white">Or login with</AbsoluteCenter>
             </Box>
-            <Button
-              leftIcon={<FcGoogle size={20} />}
-              width="full"
-              colorScheme="orange"
-              variant="outline"
-            >
-              Google
-            </Button>
-            <Button
-              leftIcon={<FaFacebook color="blue" size={20} />}
-              width="full"
-              colorScheme="orange"
-              mt="1rem"
-              variant="outline"
-            >
-              Facebook
-            </Button>
+            <GoogleLoginButton />
+            <FacebookLoginButton />
           </Form>
         </Container>
       </Flex>

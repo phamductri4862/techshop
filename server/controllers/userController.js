@@ -1,6 +1,17 @@
 import UserModel from "../models/userModel.js";
 import generateToken from "../utils/generateToken.js";
 
+const authResponse = (res, user) => {
+  generateToken(res, user._id);
+  res.status(201).json({
+    name: user.name,
+    email: user.email,
+    isAdmin: user.isAdmin,
+    avatar: user.avatar,
+    provider: user.provider,
+  });
+};
+
 export const registerUser = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
@@ -19,13 +30,7 @@ export const registerUser = async (req, res, next) => {
       email,
       password,
     });
-
-    const token = generateToken(res, createdUser._id);
-    res.status(201).json({
-      name: createdUser.name,
-      email: createdUser.email,
-      isAdmin: createdUser.isAdmin,
-    });
+    authResponse(res, createdUser);
   } catch (error) {
     next(error);
   }
@@ -45,12 +50,7 @@ export const loginUser = async (req, res, next) => {
       throw new Error("Email or password is not correct.");
     }
 
-    const token = generateToken(res, existedUser._id);
-    res.status(200).json({
-      name: existedUser.name,
-      email: existedUser.email,
-      isAdmin: existedUser.isAdmin,
-    });
+    authResponse(res, existedUser);
   } catch (error) {
     next(error);
   }
@@ -67,6 +67,60 @@ export const logoutUser = async (req, res, next) => {
   }
 };
 
+export const googleLogin = async (req, res, next) => {
+  try {
+    const { email, given_name, family_name, picture } = req.body;
+    const user = await UserModel.findOne({ email: email });
+    if (!user) {
+      const newUser = await UserModel.create({
+        name: given_name + " " + family_name,
+        email: email,
+        provider: "google",
+        avatar: picture,
+      });
+      authResponse(res, newUser);
+    } else {
+      if (user.provider !== "google") {
+        res.status(401);
+        throw new Error(
+          "The email has already been registered with another provider."
+        );
+      } else {
+        authResponse(res, user);
+      }
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const facebookLogin = async (req, res, next) => {
+  try {
+    const { email, name, picture } = req.body;
+    const user = await UserModel.findOne({ email });
+    if (!user) {
+      const newUser = await UserModel.create({
+        name,
+        email,
+        provider: "facebook",
+        avatar: picture.data.url,
+      });
+      authResponse(res, newUser);
+    } else {
+      if (user.provider !== "facebook") {
+        res.status(401);
+        throw new Error(
+          "The email has already been registered with another provider."
+        );
+      } else {
+        authResponse(res, user);
+      }
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getProfile = async (req, res, next) => {
   try {
     res.status(200).json({
@@ -78,4 +132,3 @@ export const getProfile = async (req, res, next) => {
     next(error);
   }
 };
-

@@ -4,7 +4,7 @@ const initialState = {
   userLoading: false,
   userInfo: null,
   userErrorMsg: null,
-  firstLoad: false,
+  firstLoading: true,
 };
 
 export const authUser = createAsyncThunk(
@@ -78,15 +78,15 @@ const userSlice = createSlice({
         state.userErrorMsg = action.payload;
       })
       .addCase(getProfile.pending, (state) => {
-        state.firstLoad = false;
+        state.firstLoading = true;
       })
       .addCase(getProfile.fulfilled, (state, action) => {
-        state.firstLoad = true;
+        state.firstLoading = false;
         state.userErrorMsg = null;
         state.userInfo = action.payload;
       })
       .addCase(getProfile.rejected, (state, action) => {
-        state.firstLoad = true;
+        state.firstLoading = false;
       });
   },
 });
